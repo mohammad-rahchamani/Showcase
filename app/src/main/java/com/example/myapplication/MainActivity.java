@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements AdapterClickListe
     private CustomAnalogClock mAnalogClock;
     private List<CityDataModel> mCityList;
 
+    private SunriseSunsetApi mApiService = null;
+
     private Callback<SunriseResponseModel> mListener = new Callback<SunriseResponseModel>() {
         @Override
         public void onResponse(Call<SunriseResponseModel> call, Response<SunriseResponseModel> response) {
@@ -121,12 +123,14 @@ public class MainActivity extends AppCompatActivity implements AdapterClickListe
 
     @Override
     public void onItemClick(View view, int position) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(API_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        SunriseSunsetApi service = retrofit.create(SunriseSunsetApi.class);
-        service.getData(mCityList.get(position).getLatitude(), mCityList.get(position).getLongitude(), 0)
+        if (mApiService==null) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(API_BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            mApiService = retrofit.create(SunriseSunsetApi.class);
+        }
+        mApiService.getData(mCityList.get(position).getLatitude(), mCityList.get(position).getLongitude(), 0)
                 .enqueue(mListener);
         TimeZone zone = TimeZone.getDefault();
         Date now = new Date();
